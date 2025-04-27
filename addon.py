@@ -1,9 +1,9 @@
 bl_info = {
-    "name": "Smart Increment Duplicate",
-    "author": "ChatGPT",
-    "version": (1, 7),
+    "name": "Increment Name",
+    "author": "Patrick Kang",
+    "version": (0, 9),
     "blender": (3, 0, 0),
-    "description": "Properly increment first number after duplication, with support for escape patterns and collection duplication.",
+    "description": "Properly increments numbered object names after duplication.",
     "category": "Object",
 }
 
