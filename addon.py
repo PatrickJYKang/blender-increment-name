@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Increment Name",
     "author": "Patrick Kang",
-    "version": (0, 9),
+    "version": (0, 9, 1),
     "blender": (3, 0, 0),
     "description": "Properly increments numbered object names after duplication.",
     "category": "Object",
@@ -91,10 +91,10 @@ def smart_increment_name(name, escape_patterns=None):
             return new_name
         suffix_num += 1
 
-class OBJECT_OT_smart_duplicate(bpy.types.Operator):
-    """Duplicate with smart name increment"""
-    bl_idname = "object.smart_duplicate"
-    bl_label = "Smart Duplicate"
+class OBJECT_OT_increment_name_duplicate(bpy.types.Operator):
+    """Duplicate with intelligent name incrementing"""
+    bl_idname = "object.increment_name_duplicate"
+    bl_label = "Increment Name Duplicate"
     bl_options = {'REGISTER', 'UNDO', 'INTERNAL'}
 
     _duplicated_objects = []
@@ -114,7 +114,7 @@ class OBJECT_OT_smart_duplicate(bpy.types.Operator):
                 if obj.name.endswith((".001", ".002", ".003")):
                     obj.name = smart_increment_name(obj.name)
             self._renamed = True
-            self.report({'INFO'}, "Object duplicated with smart naming")
+            self.report({'INFO'}, "Object duplicated with incremented name")
             
             # Auto-finish after renaming (simulates a mouse click)
             return {'FINISHED'}
@@ -138,7 +138,7 @@ def update_pattern_name(self, context):
         self.name = "Empty Pattern"
 
 # Escape Pattern item for the preferences panel
-class SMART_DUPLICATE_escape_pattern(bpy.types.PropertyGroup):
+class INCREMENT_NAME_escape_pattern(bpy.types.PropertyGroup):
     # The name property is used for displaying in the UI list
     name: StringProperty(
         name="Name",
@@ -153,8 +153,8 @@ class SMART_DUPLICATE_escape_pattern(bpy.types.PropertyGroup):
     )
 
 # Operator to add a new pattern
-class SMART_DUPLICATE_OT_add_pattern(Operator):
-    bl_idname = "object.smart_duplicate_add_pattern"
+class INCREMENT_NAME_OT_add_pattern(Operator):
+    bl_idname = "object.increment_name_add_pattern"
     bl_label = "Add Escape Pattern"
     bl_description = "Add a new pattern to escape from incrementing"
     bl_options = {'REGISTER', 'UNDO'}
@@ -197,8 +197,8 @@ class SMART_DUPLICATE_OT_add_pattern(Operator):
             return {'CANCELLED'}
 
 # Operator to remove a pattern
-class SMART_DUPLICATE_OT_remove_pattern(Operator):
-    bl_idname = "object.smart_duplicate_remove_pattern"
+class INCREMENT_NAME_OT_remove_pattern(Operator):
+    bl_idname = "object.increment_name_remove_pattern"
     bl_label = "Remove Escape Pattern"
     bl_description = "Remove the selected escape pattern"
     bl_options = {'REGISTER', 'UNDO'}
@@ -211,10 +211,10 @@ class SMART_DUPLICATE_OT_remove_pattern(Operator):
         return {'FINISHED'}
 
 # Preferences panel for the addon
-class SmartDuplicatePreferences(AddonPreferences):
+class IncrementNamePreferences(AddonPreferences):
     bl_idname = __name__
 
-    escape_patterns: CollectionProperty(type=SMART_DUPLICATE_escape_pattern)
+    escape_patterns: CollectionProperty(type=INCREMENT_NAME_escape_pattern)
     active_pattern_index: IntProperty(name="Active Pattern Index")
     
     recursive_collection_rename: BoolProperty(
@@ -245,9 +245,9 @@ class SmartDuplicatePreferences(AddonPreferences):
         layout.label(text="Example: For objects named '1WALLN', add '1WALL' as a pattern to increment the N instead of the 1")
 
 # Sidebar panel for escape patterns management
-class VIEW3D_PT_smart_duplicate(Panel):
-    bl_label = "Smart Duplicate"
-    bl_idname = "VIEW3D_PT_smart_duplicate"
+class VIEW3D_PT_increment_name(Panel):
+    bl_label = "Increment Name"
+    bl_idname = "VIEW3D_PT_increment_name"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_category = "Tool"  # This puts it in the Tool tab of the sidebar
@@ -279,8 +279,8 @@ class VIEW3D_PT_smart_duplicate(Panel):
     
                 # Add/remove pattern buttons
                 row = layout.row()
-                row.operator("object.smart_duplicate_add_pattern", icon="ADD", text="Add Pattern")
-                row.operator("object.smart_duplicate_remove_pattern", icon="REMOVE", text="Remove Pattern")
+                row.operator("object.increment_name_add_pattern", icon="ADD", text="Add Pattern")
+                row.operator("object.increment_name_remove_pattern", icon="REMOVE", text="Remove Pattern")
                 
                 # Pattern list
                 layout.template_list("UI_UL_list", "escape_patterns", prefs, "escape_patterns", 
@@ -320,13 +320,13 @@ def smart_rename_collection_objects(collection, recursive=True):
             for child_collection in collection.children:
                 smart_rename_collection_objects(child_collection, recursive)
     except Exception as e:
-        print(f"Smart Duplicate: Error renaming collection objects: {e}")
+        print(f"Increment Name: Error renaming collection objects: {e}")
 
 # Collection duplication operator - works like the object duplication
-class OUTLINER_OT_smart_collection_duplicate(Operator):
-    """Smart duplicate collections with intelligent object renaming"""
-    bl_idname = "outliner.smart_collection_duplicate"
-    bl_label = "Smart Duplicate Collection"
+class OUTLINER_OT_increment_name_collection_duplicate(Operator):
+    """Duplicate collections with intelligent name incrementing"""
+    bl_idname = "outliner.increment_name_collection_duplicate"
+    bl_label = "Increment Name Collection Duplicate"
     bl_description = "Duplicate selected collection with smart naming"
     bl_options = {'REGISTER', 'UNDO'}
     
@@ -343,7 +343,7 @@ class OUTLINER_OT_smart_collection_duplicate(Operator):
             context.window_manager.modal_handler_add(self)
             return {'RUNNING_MODAL'}
         except Exception as e:
-            self.report({'ERROR'}, f"Smart Duplicate: {e}")
+            self.report({'ERROR'}, f"Increment Name: {e}")
             return {'CANCELLED'}
     
     def modal(self, context, event):
@@ -363,7 +363,7 @@ class OUTLINER_OT_smart_collection_duplicate(Operator):
             # Auto-finish after renaming (simulates accepting the duplication)
             return {'FINISHED'}
         except Exception as e:
-            print(f"Smart Duplicate: Error in modal function: {e}")
+            print(f"Increment Name: Error in modal function: {e}")
             return {'FINISHED'}
 
 def get_addon_prefs():
@@ -382,13 +382,13 @@ def get_addon_prefs():
 
 def register():
     # Register all our custom classes
-    bpy.utils.register_class(SMART_DUPLICATE_escape_pattern)
-    bpy.utils.register_class(SMART_DUPLICATE_OT_add_pattern)
-    bpy.utils.register_class(SMART_DUPLICATE_OT_remove_pattern)
-    bpy.utils.register_class(SmartDuplicatePreferences)
-    bpy.utils.register_class(OBJECT_OT_smart_duplicate)
-    bpy.utils.register_class(VIEW3D_PT_smart_duplicate)
-    bpy.utils.register_class(OUTLINER_OT_smart_collection_duplicate)
+    bpy.utils.register_class(INCREMENT_NAME_escape_pattern)
+    bpy.utils.register_class(INCREMENT_NAME_OT_add_pattern)
+    bpy.utils.register_class(INCREMENT_NAME_OT_remove_pattern)
+    bpy.utils.register_class(IncrementNamePreferences)
+    bpy.utils.register_class(OBJECT_OT_increment_name_duplicate)
+    bpy.utils.register_class(VIEW3D_PT_increment_name)
+    bpy.utils.register_class(OUTLINER_OT_increment_name_collection_duplicate)
     
     # Set up the keyboard shortcuts
     wm = bpy.context.window_manager
@@ -396,12 +396,12 @@ def register():
     if kc:
         # For 3D View - Object duplication
         km = kc.keymaps.new(name='Object Mode', space_type='EMPTY')
-        kmi = km.keymap_items.new(OBJECT_OT_smart_duplicate.bl_idname, 'D', 'PRESS', shift=True)
+        kmi = km.keymap_items.new(OBJECT_OT_increment_name_duplicate.bl_idname, 'D', 'PRESS', shift=True)
         addon_keymaps.append((km, kmi))
         
         # For Outliner - Collection duplication
         km = kc.keymaps.new(name='Outliner', space_type='OUTLINER')
-        kmi = km.keymap_items.new(OUTLINER_OT_smart_collection_duplicate.bl_idname, 'D', 'PRESS', shift=True)
+        kmi = km.keymap_items.new(OUTLINER_OT_increment_name_collection_duplicate.bl_idname, 'D', 'PRESS', shift=True)
         addon_keymaps.append((km, kmi))
 
 def unregister():
@@ -411,13 +411,13 @@ def unregister():
     addon_keymaps.clear()
     
     # Unregister all classes in reverse order
-    bpy.utils.unregister_class(OUTLINER_OT_smart_collection_duplicate)
-    bpy.utils.unregister_class(VIEW3D_PT_smart_duplicate)
-    bpy.utils.unregister_class(OBJECT_OT_smart_duplicate)
-    bpy.utils.unregister_class(SmartDuplicatePreferences)
-    bpy.utils.unregister_class(SMART_DUPLICATE_OT_remove_pattern)
-    bpy.utils.unregister_class(SMART_DUPLICATE_OT_add_pattern)
-    bpy.utils.unregister_class(SMART_DUPLICATE_escape_pattern)
+    bpy.utils.unregister_class(OUTLINER_OT_increment_name_collection_duplicate)
+    bpy.utils.unregister_class(VIEW3D_PT_increment_name)
+    bpy.utils.unregister_class(OBJECT_OT_increment_name_duplicate)
+    bpy.utils.unregister_class(IncrementNamePreferences)
+    bpy.utils.unregister_class(INCREMENT_NAME_OT_remove_pattern)
+    bpy.utils.unregister_class(INCREMENT_NAME_OT_add_pattern)
+    bpy.utils.unregister_class(INCREMENT_NAME_escape_pattern)
 
 if __name__ == "__main__":
     register()
