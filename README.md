@@ -12,7 +12,7 @@ A Blender addon that properly increments numbered object and collection names af
 
 ## Installation
 
-1. Download the [latest release](https://github.com/PatrickKang/blender-increment-name/releases).
+1. Download the [latest release](https://github.com/PatrickJYKang/blender-increment-name/releases/tag/v0.9.1).
 2. In Blender, go to Edit > Preferences > Add-ons.
 3. Click "Install..." and select the downloaded zip file.
 4. Enable the addon by checking the box next to "Object: Increment Name".
